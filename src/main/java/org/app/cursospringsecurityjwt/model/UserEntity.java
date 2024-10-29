@@ -24,6 +24,7 @@ public class UserEntity {
     private long id;
     @NotBlank
     @Size(max=80)
+    @Column(unique=true)
     private String username;
     @NotBlank
     private String password;

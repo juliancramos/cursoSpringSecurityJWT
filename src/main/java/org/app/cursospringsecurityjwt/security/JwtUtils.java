@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
-
-
+import javax.crypto.SecretKey;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -76,5 +76,16 @@ public class JwtUtils {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+//PARA GENERAR LA CLAVE DE 256 BITS EN APPLICATION PROPERTIES
+//    public static void main(String[] args) {
+//        // Genera una clave de 256 bits
+//        SecretKey secretKey = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
+//
+//        // Codifica la clave en formato Base64 para almacenarla en application.properties
+//        String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
+//
+//        System.out.println("Clave generada en Base64: " + encodedKey);
+//    }
 
 }

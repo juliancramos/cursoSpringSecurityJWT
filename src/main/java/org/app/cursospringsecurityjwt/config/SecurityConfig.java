@@ -1,5 +1,8 @@
 package org.app.cursospringsecurityjwt.config;
 
+import org.app.cursospringsecurityjwt.security.JwtUtils;
+import org.app.cursospringsecurityjwt.security.filters.JwtAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,8 +20,20 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
+
+    @Autowired
+    UserDetailsService userDetailsService;
+
+    @Autowired
+    JwtUtils jwtUtils;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) throws Exception {
+
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtils);
+        jwtAuthenticationFilter.setAuthenticationManager(authenticationManager);
+        jwtAuthenticationFilter.setFilterProcessesUrl("/login");
+
         return httpSecurity
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> {
@@ -28,20 +43,20 @@ public class SecurityConfig {
                 .sessionManagement(session -> {
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 })
-                .httpBasic(Customizer.withDefaults())
+                .addFilter(jwtAuthenticationFilter)
                 .build();
     }
 
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User.withUsername("santiago")
-                .password("1234")
-                .roles("USER") // Asegúrate de especificar al menos un rol
-                .build());
-        return manager;
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+//        manager.createUser(User.withUsername("santiago")
+//                .password("1234")
+//                .roles("USER") // Asegúrate de especificar al menos un rol
+//                .build());
+//        return manager;
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -54,11 +69,13 @@ public class SecurityConfig {
                 httpSecurity.getSharedObject(AuthenticationManagerBuilder.class);
 
         authenticationManagerBuilder
-                .userDetailsService(userDetailsService())
+                .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder);
 
         return authenticationManagerBuilder.build();
     }
+
+
 
 
 
